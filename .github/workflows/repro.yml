@@ -1,0 +1,18 @@
+name: GITHUB_PATH in container without PATH env
+
+on: workflow_dispatch
+
+jobs:
+  repro:
+    runs-on: ubuntu-latest
+    # rockylinux:9 as of the time of reporting
+    # pinning by hash, as they're about to add PATH as a workaround for this.
+    container: rockylinux:9@sha256:03303863808e9cd79f0c58c833db3e5f9cde9f2abe16804a267b05dc54af86e4
+    steps:
+      # works, prints Docker's default:
+      # /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - run: echo "$PATH"
+      - run: echo "/opt/dummy/bin" >> "$GITHUB_PATH"
+      # fails: OCI runtime exec failed: exec failed: unable to start container process:
+      #        exec: "sh": executable file not found in $PATH
+      - run: echo "$PATH"
